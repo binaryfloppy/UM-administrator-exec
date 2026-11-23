@@ -1,0 +1,60 @@
+name: um
+
+x-um: &um
+  image: ${UM_IMAGE:-ibmwebmethods.azurecr.io/universalmessaging-server:12.1}
+  restart: unless-stopped
+  stop_grace_period: 60s
+
+# REALM_NAME doit faire au moins 6 caracteres : le serveur s'en sert comme mot de passe
+# du keystore cluster (sinon "Key password must be at least 6 characters" et le cluster
+# ne peut pas se former).
+services:
+  um1:
+    <<: *um
+    container_name: um1
+    hostname: um1
+    environment:
+      REALM_NAME: umnode1
+    ports:
+      - "${UM1_PORT:-2001}:9000"
+    volumes:
+      - um1-data:/opt/webmethods/UniversalMessaging/server/umserver/data
+      - um1-logs:/opt/webmethods/UniversalMessaging/server/umserver/logs
+      - um1-conf:/opt/webmethods/common/conf
+
+  um2:
+    <<: *um
+    container_name: um2
+    hostname: um2
+    environment:
+      REALM_NAME: umnode2
+    ports:
+      - "${UM2_PORT:-2002}:9000"
+    volumes:
+      - um2-data:/opt/webmethods/UniversalMessaging/server/umserver/data
+      - um2-logs:/opt/webmethods/UniversalMessaging/server/umserver/logs
+      - um2-conf:/opt/webmethods/common/conf
+
+  um3:
+    <<: *um
+    container_name: um3
+    hostname: um3
+    environment:
+      REALM_NAME: umnode3
+    ports:
+      - "${UM3_PORT:-2003}:9000"
+    volumes:
+      - um3-data:/opt/webmethods/UniversalMessaging/server/umserver/data
+      - um3-logs:/opt/webmethods/UniversalMessaging/server/umserver/logs
+      - um3-conf:/opt/webmethods/common/conf
+
+volumes:
+  um1-data:
+  um1-logs:
+  um1-conf:
+  um2-data:
+  um2-logs:
+  um2-conf:
+  um3-data:
+  um3-logs:
+  um3-conf:

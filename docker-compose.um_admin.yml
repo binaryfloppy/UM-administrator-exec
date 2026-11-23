@@ -1,0 +1,36 @@
+# Conteneur um_admin : IHM + Prometheus. Lancer depuis UM/ avec le cluster deja demarre (reseau um_default) :
+#   UM_HOST_DIR="$PWD" docker compose -f docker-compose.um_admin.yml up -d --build
+# Le projet UM est monte au MEME chemin que sur l'hote : ce chemin est transmis tel quel au daemon Docker de l'hote
+# (docker run -v ...) lors des sauvegardes. Le socket Docker donne un acces tres etendu a l'hote.
+name: um_admin
+
+services:
+  um_admin:
+    image: ${UM_ADMIN_IMAGE:-um_admin:latest}
+    container_name: um_admin
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${UM_ADMIN_PORT:-8088}:8088"   # IHM
+      - "${PROMETHEUS_PORT:-9090}:9090"   # Prometheus
+    environment:
+      UM_HOST_DIR: ${UM_HOST_DIR:?lancer avec UM_HOST_DIR="$PWD"}
+      DOCKER_NETWORK: ${DOCKER_NETWORK:-um_default}
+      CLUSTER_NAME: ${CLUSTER_NAME:-umcluster}
+      UM_IMAGE: ${UM_IMAGE:-ibmwebmethods.azurecr.io/universalmessaging-server:12.1}
+      UM_ADMIN_UM_PASSWORD: ${UM_ADMIN_UM_PASSWORD:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${UM_HOST_DIR}:${UM_HOST_DIR}
+      - um_admin-data:/data
+      - um_admin-prom:/prometheus
+    networks: [um_default]
+
+volumes:
+  um_admin-data:
+  um_admin-prom:
+
+networks:
+  um_default:
+    name: ${DOCKER_NETWORK:-um_default}
+    external: true

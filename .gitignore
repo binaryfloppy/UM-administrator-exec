@@ -1,0 +1,15 @@
+# Backups (volumineux, tar avec clefs et certificats)
+backups/
+
+# Python cache et bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Systeme d'exploitation
+.DS_Store
+Thumbs.db
+
+# Historique diagnostic local et parametres locaux
+ui/settings.json
+diagnostics/
