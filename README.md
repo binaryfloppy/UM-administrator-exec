@@ -21,22 +21,13 @@ Le fichier de configuration [`deploy.conf`](deploy.conf) permet de personnaliser
 
 ### Déploiement dans un nouvel environnement sans partager le code source
 
-Si vous ne souhaitez pas partager les sources Python / IHM (`ui/`, `um_admin/`) :
-1. **Sur l'environnement source** : exporter l'image construite :
-   ```bash
-   docker save -o um_admin.tar um_admin:latest
-   ```
-2. **Sur le nouvel environnement** :
-   - Importer l'image :
-     ```bash
-     docker load -i um_admin.tar
-     ```
-   - Déposer uniquement : `docker-compose.yml`, `docker-compose.um_admin.yml`, `deploy.conf` et `deploy.sh`.
-   - Lancer :
-     ```bash
-     ./deploy.sh
-     ```
-   Le script détectera l'image déjà présente et lancera directement le conteneur sans avoir besoin du Dockerfile ni du code source.
+Un dépôt dédié **[`UM-administrator-exec`](https://github.com/binaryfloppy/UM-administrator-exec)** est disponible pour déployer la solution sans distribuer les sources Python (`ui/`, `um_admin/Dockerfile`) :
+- Il contient les fichiers : `docker-compose.yml`, `docker-compose.um_admin.yml`, `deploy.conf`, `deploy.sh`, `scripts/` et l'image Docker pré-packagée `um_admin.tar` (suivie via Git LFS).
+- Sur la machine cible, il suffit de cloner le dépôt et d'exécuter :
+  ```bash
+  ./deploy.sh
+  ```
+  Le script charge automatiquement l'image `um_admin.tar` si elle n'est pas encore présente dans Docker et démarre l'ensemble des services.
 
 Ou manuellement :
 ```bash

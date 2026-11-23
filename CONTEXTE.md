@@ -1,6 +1,6 @@
 # Reprise de contexte — projet UM (webMethods Universal Messaging 12.1)
 
-Dernière mise à jour : 2026-11-23 (Onglet Scripts pour génération de script Bash autonome de création / reconstruction avec aide intégrée, propriété `script_dir` dans Administration, ajout de la version UM dans les sauvegardes et l'IHM).
+Dernière mise à jour : 2026-11-23 (Dépôts Git distants GitHub initialisés et synchronisés : `UM-administrator` pour les sources complètes et `UM-administrator-exec` pour le package de déploiement exécutable sans sources avec Git LFS).
 L'utilisateur est francophone : répondre en français, de façon directe et technique, avec des modifications minimales.
 **Consigne permanente** : après toute modification de `ui/`, `um_admin/` ou `docker-compose.um_admin.yml`, reconstruire l'image et recréer le conteneur sans attendre qu'on le demande (`cd UM && docker build -t um_admin:latest -f um_admin/Dockerfile . && UM_HOST_DIR="$PWD" docker compose -f docker-compose.um_admin.yml up -d` ; le compose n'a pas de `build`, `--build` seul ne fait rien), puis vérifier que le code embarqué est le bon (`docker exec um_admin grep ... /app/ui/...`) et que `/api/status` répond. Le code est copié dans l'image, pas monté.
 Le fichier [`README.md`](README.md) décrit le projet côté utilisateur. Celui-ci décrit l'état du travail et ce qui reste à faire.
@@ -78,8 +78,21 @@ Détail et chiffres dans la section « Volumétrie et robustesse » du [`README.
 - Piège : `/api/status` suit la source de métriques configurée (Prometheus = retard jusqu'à 15 s) ; juste après un redémarrage de nœuds il peut afficher « Aucun cluster » quelques secondes alors que `wait_formed` (lecture directe) a déjà vu le cluster formé.
 - Limite connue : la sauvegarde est à froid et séquentielle ; non testée au-delà de 50 Mo de données réelles.
 
-## 2. Environnement de référence
+## 2. Environnement de référence et Dépôts Git
 
+### Dépôts Git GitHub associés au projet
+1. **Dépôt avec code source complet : `UM-administrator`**
+   - **URL distante** : `https://github.com/binaryfloppy/UM-administrator`
+   - **Dossier local** : `/Users/julien/.bob/playground/UM`
+   - **Contenu** : sources Python de l'IHM (`ui/`), Dockerfile (`um_admin/`), fichiers compose, scripts shell, configurations et documentations Markdown (`README.md`, `CONTEXTE.md`).
+   - **Exclusions (`.gitignore`)** : `backups/`, `__pycache__/`, `.DS_Store`, `diagnostics/`, `ui/settings.json`.
+
+2. **Dépôt exécutable / déploiement autonome sans sources : `UM-administrator-exec`**
+   - **URL distante** : `https://github.com/binaryfloppy/UM-administrator-exec`
+   - **Dossier local** : `/Users/julien/Documents/bob/um_admin`
+   - **Contenu** : scripts de déploiement (`deploy.sh`, `deploy.conf`), fichiers compose (`docker-compose.yml`, `docker-compose.um_admin.yml`), scripts utilitaires (`scripts/um_cluster.sh`), documentations (`README.md`, `CONTEXTE.md`), et image Docker pré-packagée (`um_admin.tar` gérée via **Git LFS**). Permet de déployer sans partager le code source Python.
+
+### Caractéristiques de l'environnement
 - Dossier de travail : `/Users/julien/.bob/playground`, projet dans `UM/`. Mac arm64, Docker 29.1.3.
 - Image : `ibmwebmethods.azurecr.io/universalmessaging-server:12.1` (linux/amd64, émulée). Écoute sur 9000 (nhp), exporteur Prometheus sur 9200 (`curl` présent dans l'image, **pas de gzip** : `tar` non compressé).
 - 3 conteneurs `um1`, `um2`, `um3` (hostnames identiques), ports hôte 2001, 2002, 2003 vers 9000. Realms `umnode1..3`.
